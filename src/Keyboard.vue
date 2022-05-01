@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { LetterState } from './types'
+import { LetterState } from "./types";
 
 defineProps<{
-  letterStates: Record<string, LetterState>
-}>()
+  letterStates: Record<string, LetterState>;
+}>();
 
 defineEmits<{
-  (e: 'key', key: string): void
-}>()
+  (e: "key", key: string): void;
+}>();
 
 const rows = [
-  'qwertyuiop'.split(''),
-  'asdfghjkl'.split(''),
-  ['Enter', ...'zxcvbnm'.split(''), 'Backspace']
-]
+  "qwertyuiop".split(""),
+  "asdfghjkl".split(""),
+  ["Enter", ..."zxcvbnm".split(""), "Backspace"],
+];
 </script>
 
 <template>
