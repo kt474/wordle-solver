@@ -1,6 +1,8 @@
-import { createApp } from "Vue";
-import Game from "./Game.vue";
-import "./game.css";
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import App from "./App.vue";
+import "./styles/game.css";
+import "./styles/index.css";
 
 // resize for scaling the board size
 window.addEventListener("resize", onResize);
@@ -12,4 +14,7 @@ function onResize() {
   document.body.style.setProperty("--vh", window.innerHeight + "px");
 }
 
-createApp(Game).mount("#app");
+const app = createApp(App);
+app.use(createPinia());
+
+app.mount("#app");

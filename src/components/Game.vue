@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onUnmounted } from "Vue";
-import { getWordOfTheDay, allWords } from "./words";
+import { onUnmounted } from "vue";
+import { getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
-import { LetterState } from "./types";
+import { LetterState } from "../types";
+import { useStore } from "../store/store";
 
 // Get word of the day
 const answer = getWordOfTheDay();
@@ -31,6 +32,7 @@ let success = $ref(false);
 const letterStates: Record<string, LetterState> = $ref({});
 
 // Handle keyboard input.
+const store = useStore();
 let allowInput = true;
 
 const onKeyup = (e: KeyboardEvent) => onKey(e.key);
@@ -42,7 +44,7 @@ onUnmounted(() => {
 });
 
 function onKey(key: string) {
-  if (!allowInput) return;
+  if (!allowInput || store.inputWordFocus) return;
   if (/^[a-zA-Z]$/.test(key)) {
     fillTile(key.toLowerCase());
   } else if (key === "Backspace") {
@@ -179,13 +181,7 @@ function genResultGrid() {
     </div>
   </Transition>
   <header>
-    <h1>VVORDLE</h1>
-    <a
-      id="source-link"
-      href="https://github.com/yyx990803/vue-wordle"
-      target="_blank"
-      >Source</a
-    >
+    <h1 class="text-3xl">Wordle</h1>
   </header>
   <div id="board">
     <div

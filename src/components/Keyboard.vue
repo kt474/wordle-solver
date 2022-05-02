@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LetterState } from "./types";
+import { LetterState } from "../types";
 
 defineProps<{
   letterStates: Record<string, LetterState>;
