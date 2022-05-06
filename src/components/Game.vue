@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { onUnmounted } from "vue";
+import { computed, onUnmounted } from "vue";
 import { getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
 import { LetterState } from "../types";
 import { useStore } from "../store/store";
+const store = useStore();
 
 // Get word of the day
-const answer = getWordOfTheDay();
+const answer = computed(() => {
+  if (!store.inputWord){
+    return getWordOfTheDay()
+  }
+  return store.inputWord
+})
+
 
 // Board state. Each tile is represented as { letter, state }
 const board = $ref(
@@ -32,7 +39,6 @@ let success = $ref(false);
 const letterStates: Record<string, LetterState> = $ref({});
 
 // Handle keyboard input.
-const store = useStore();
 let allowInput = true;
 
 const onKeyup = (e: KeyboardEvent) => onKey(e.key);
@@ -75,13 +81,14 @@ function clearTile() {
 function completeRow() {
   if (currentRow.every((tile) => tile.letter)) {
     const guess = currentRow.map((tile) => tile.letter).join("");
-    if (!allWords.includes(guess) && guess !== answer) {
+    if (!allWords.includes(guess) && guess !== answer.value) {
       shake();
       showMessage(`Not in word list`);
       return;
     }
 
-    const answerLetters: (string | null)[] = answer.split("");
+    const answerLetters: (string | null)[] = answer.value.split("");
+    console.log(answerLetters)
     // first pass: mark correct ones
     currentRow.forEach((tile, i) => {
       if (answerLetters[i] === tile.letter) {
@@ -131,7 +138,7 @@ function completeRow() {
     } else {
       // game over :(
       setTimeout(() => {
-        showMessage(answer.toUpperCase(), -1);
+        showMessage(answer.value.toUpperCase(), -1);
       }, 1600);
     }
   } else {
@@ -181,7 +188,7 @@ function genResultGrid() {
     </div>
   </Transition>
   <header>
-    <h1 class="text-3xl">Wordle</h1>
+    <h1 class="text-3xl text-center">Wordle</h1>
   </header>
   <div id="board">
     <div

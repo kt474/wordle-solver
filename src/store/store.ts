@@ -11,5 +11,8 @@ export const useStore = defineStore("main", {
     updateFocusState(payload: boolean) {
       this.inputWordFocus = payload;
     },
+    updateQuery(query: string) {
+      this.inputWord = query;
+    },
   },
 });
