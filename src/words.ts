@@ -24,6 +24,10 @@ export function getWordOfTheDay() {
   return answers[day];
 }
 
+export function isValidWord(word: string){
+  return word.length === 5  && allWords.includes(word)
+}
+
 // copied from Wordle source
 const answers = [
   "cigar",

@@ -1,11 +1,18 @@
 <script setup>
 import { ref } from "vue";
 import {useStore} from "../store/store";
+import { isValidWord } from "../words";
 const query = ref("");
 const store = useStore();
+let displayText = ref("")
 
 function saveQuery(str) {
-  store.updateQuery(str)
+  if(isValidWord(str)){
+    store.updateQuery(str)
+    displayText.value = str
+  } else {
+    displayText.value = 'Not a valid word '
+  }
 }
 </script>
 <template>
@@ -18,6 +25,7 @@ function saveQuery(str) {
       @focusout="store.updateFocusState(false)"
       type="text"
       placeholder="Guessing Word"
+      @keyup.enter="saveQuery(query)"
     />
     <div class="m-1">
       <button
@@ -30,6 +38,6 @@ function saveQuery(str) {
     </div>
   </div>
   <div>
-    <p class="align">Current Answer: {{query}}</p>
+    <p class="align">Current Answer: {{displayText}}</p>
   </div>
 </template>

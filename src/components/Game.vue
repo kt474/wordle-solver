@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted } from "vue";
-import { getWordOfTheDay, allWords } from "../words";
+import { isValidWord, getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
 import { LetterState } from "../types";
 import { useStore } from "../store/store";
@@ -8,7 +8,7 @@ const store = useStore();
 
 // Get word of the day
 const answer = computed(() => {
-  if (!store.inputWord){
+  if (!store.inputWord || !isValidWord(store.inputWord)){
     return getWordOfTheDay()
   }
   return store.inputWord
@@ -88,7 +88,6 @@ function completeRow() {
     }
 
     const answerLetters: (string | null)[] = answer.value.split("");
-    console.log(answerLetters)
     // first pass: mark correct ones
     currentRow.forEach((tile, i) => {
       if (answerLetters[i] === tile.letter) {
