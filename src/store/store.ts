@@ -6,9 +6,13 @@ export const useStore = defineStore("main", {
       inputWord: "",
       inputWordFocus: false,
       openModal: false,
+      darkMode: false,
     };
   },
   actions: {
+    updateDarkMode(payload: boolean) {
+      this.darkMode = payload;
+    },
     updateModal(payload: boolean) {
       this.openModal = payload;
     },

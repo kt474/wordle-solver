@@ -38,6 +38,8 @@ function saveQuery(str) {
     </div>
   </div>
   <div>
-    <p class="align">Current Answer: {{ displayText }}</p>
+    <p class="align text-black dark:text-white">
+      Current Answer: {{ displayText }}
+    </p>
   </div>
 </template>

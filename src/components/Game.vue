@@ -36,9 +36,10 @@ let shakeRowIndex = $ref(-1);
 let success = $ref(false);
 
 watch(message, () => {
-  console.log("message changed");
   if (message) {
-    store.updateModal(true);
+    setTimeout(() => {
+      store.updateModal(true);
+    }, 1500);
   }
 });
 
@@ -193,7 +194,7 @@ function genResultGrid() {
     </div>
   </Transition>
   <header>
-    <h1 class="text-3xl text-center">Wordle</h1>
+    <h1 class="text-3xl text-center text-black dark:text-white">Wordle</h1>
   </header>
   <div id="board">
     <div
@@ -208,7 +209,10 @@ function genResultGrid() {
         v-for="(tile, index) in row"
         :class="['tile', tile.letter && 'filled', tile.state && 'revealed']"
       >
-        <div class="front" :style="{ transitionDelay: `${index * 300}ms` }">
+        <div
+          class="front text-black dark:text-white"
+          :style="{ transitionDelay: `${index * 300}ms` }"
+        >
           {{ tile.letter }}
         </div>
         <div
