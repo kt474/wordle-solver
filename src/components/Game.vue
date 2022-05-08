@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { computed, onUnmounted } from "vue";
+import { computed, onUnmounted, watch, ref } from "vue";
 import { isValidWord, getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
+import Modal from "../components/Modal.vue";
 import { LetterState } from "../types";
 import { useStore } from "../store/store";
 const store = useStore();
 
 // Get word of the day
 const answer = computed(() => {
-  if (!store.inputWord || !isValidWord(store.inputWord)){
-    return getWordOfTheDay()
+  if (!store.inputWord || !isValidWord(store.inputWord)) {
+    return getWordOfTheDay();
   }
-  return store.inputWord
-})
-
+  return store.inputWord;
+});
 
 // Board state. Each tile is represented as { letter, state }
 const board = $ref(
@@ -30,10 +30,17 @@ let currentRowIndex = $ref(0);
 const currentRow = $computed(() => board[currentRowIndex]);
 
 // Feedback state: message and shake
-let message = $ref("");
+let message = ref("");
 let grid = $ref("");
 let shakeRowIndex = $ref(-1);
 let success = $ref(false);
+
+watch(message, () => {
+  console.log("message changed");
+  if (message) {
+    store.updateModal(true);
+  }
+});
 
 // Keep track of revealed letters for the virtual keyboard
 const letterStates: Record<string, LetterState> = $ref({});
@@ -147,10 +154,10 @@ function completeRow() {
 }
 
 function showMessage(msg: string, time = 1000) {
-  message = msg;
+  message.value = msg;
   if (time > 0) {
     setTimeout(() => {
-      message = "";
+      message.value = "";
     }, time);
   }
 }
@@ -181,9 +188,8 @@ function genResultGrid() {
 
 <template>
   <Transition>
-    <div class="message" v-if="message">
-      {{ message }}
-      <pre v-if="grid">{{ grid }}</pre>
+    <div v-if="message">
+      <Modal :msg="message" :grid="grid" />
     </div>
   </Transition>
   <header>
@@ -227,26 +233,10 @@ function genResultGrid() {
   grid-gap: 5px;
   padding: 10px;
   box-sizing: border-box;
-  --height: min(420px, calc(var(--vh, 100vh) - 310px));
+  --height: min(420px, calc(100vh - 310px));
   height: var(--height);
   width: min(350px, calc(var(--height) / 6 * 5));
   margin: 0 auto;
-}
-.message {
-  position: absolute;
-  left: 50%;
-  top: 80px;
-  color: #fff;
-  background-color: rgba(0, 0, 0, 0.85);
-  padding: 16px 20px;
-  z-index: 2;
-  border-radius: 4px;
-  transform: translateX(-50%);
-  transition: opacity 0.3s ease-out;
-  font-weight: 600;
-}
-.message.v-leave-to {
-  opacity: 0;
 }
 .row {
   display: grid;

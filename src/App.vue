@@ -4,11 +4,11 @@ import Input from "./components/Input.vue";
 </script>
 
 <template>
-  <div class="w-full">
+  <div class="w-full flex">
     <div>
       <Game />
     </div>
-    <div>
+    <div class="ml-16 mt-8">
       <Input />
     </div>
   </div>

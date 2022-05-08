@@ -1,17 +1,17 @@
 <script setup>
 import { ref } from "vue";
-import {useStore} from "../store/store";
+import { useStore } from "../store/store";
 import { isValidWord } from "../words";
 const query = ref("");
 const store = useStore();
-let displayText = ref("")
+let displayText = ref("");
 
 function saveQuery(str) {
-  if(isValidWord(str)){
-    store.updateQuery(str)
-    displayText.value = str
+  if (isValidWord(str)) {
+    store.updateQuery(str);
+    displayText.value = str;
   } else {
-    displayText.value = 'Not a valid word '
+    displayText.value = "Not a valid word ";
   }
 }
 </script>
@@ -24,7 +24,7 @@ function saveQuery(str) {
       @focusin="store.updateFocusState(true)"
       @focusout="store.updateFocusState(false)"
       type="text"
-      placeholder="Guessing Word"
+      placeholder="Wordle Answer"
       @keyup.enter="saveQuery(query)"
     />
     <div class="m-1">
@@ -38,6 +38,6 @@ function saveQuery(str) {
     </div>
   </div>
   <div>
-    <p class="align">Current Answer: {{displayText}}</p>
+    <p class="align">Current Answer: {{ displayText }}</p>
   </div>
 </template>
