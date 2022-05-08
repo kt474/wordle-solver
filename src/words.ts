@@ -1,3 +1,5 @@
+//@ts-ignore
+import sample from "lodash.sample";
 const defaultMessage = " Using word of the day instead.";
 
 export function getWordOfTheDay() {
@@ -24,8 +26,12 @@ export function getWordOfTheDay() {
   return answers[day];
 }
 
-export function isValidWord(word: string){
-  return word.length === 5  && allWords.includes(word)
+export function isValidWord(word: string) {
+  return word.length === 5 && allWords.includes(word);
+}
+
+export function getRandomAnswer() {
+  return sample(answers);
 }
 
 // copied from Wordle source

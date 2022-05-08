@@ -2,6 +2,8 @@
 import { ref } from "vue";
 import { useStore } from "../store/store";
 import { isValidWord } from "../words";
+import { getRandomAnswer } from "../words";
+
 const query = ref("");
 const store = useStore();
 let displayText = ref("");
@@ -13,6 +15,11 @@ function saveQuery(str) {
   } else {
     displayText.value = "Not a valid word ";
   }
+}
+function useRandomAnswer() {
+  const answer = getRandomAnswer();
+  store.updateQuery(answer);
+  displayText.value = answer;
 }
 </script>
 <template>
@@ -37,9 +44,27 @@ function saveQuery(str) {
       </button>
     </div>
   </div>
+  <div class="mt-2">
+    <button
+      @click="useRandomAnswer"
+      type="button"
+      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Generate Random Answer
+    </button>
+  </div>
   <div>
     <p class="align text-black dark:text-white">
       Current Answer: {{ displayText }}
     </p>
+  </div>
+  <div class="mt-2">
+    <button
+      @click="store.resetBoardState()"
+      type="button"
+      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Clear Board
+    </button>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, watch, ref } from "vue";
+import { computed, onUnmounted, watch } from "vue";
 import { isValidWord, getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
 import Modal from "../components/Modal.vue";
@@ -16,24 +16,27 @@ const answer = computed(() => {
 });
 
 // Board state. Each tile is represented as { letter, state }
-const board = $ref(
-  Array.from({ length: 6 }, () =>
-    Array.from({ length: 5 }, () => ({
-      letter: "",
-      state: LetterState.INITIAL,
-    }))
-  )
-);
+const board = computed(() => {
+  return store.boardState;
+});
 
 // Current active row.
-let currentRowIndex = $ref(0);
-const currentRow = $computed(() => board[currentRowIndex]);
+const currentRowIndex = computed(() => {
+  return store.currentRowIndex;
+});
+const currentRow = $computed(() => board.value[currentRowIndex.value]);
 
 // Feedback state: message and shake
-let message = ref("");
-let grid = $ref("");
+const message = computed(() => {
+  return store.message;
+});
+const grid = computed(() => {
+  return store.grid;
+});
+const success = computed(() => {
+  return store.success;
+});
 let shakeRowIndex = $ref(-1);
-let success = $ref(false);
 
 watch(message, () => {
   if (message) {
@@ -44,10 +47,12 @@ watch(message, () => {
 });
 
 // Keep track of revealed letters for the virtual keyboard
-const letterStates: Record<string, LetterState> = $ref({});
+const letterStates = store.letterStatesComputed;
 
 // Handle keyboard input.
-let allowInput = true;
+const allowInput = computed(() => {
+  return store.allowInput;
+});
 
 const onKeyup = (e: KeyboardEvent) => onKey(e.key);
 
@@ -99,7 +104,8 @@ function completeRow() {
     // first pass: mark correct ones
     currentRow.forEach((tile, i) => {
       if (answerLetters[i] === tile.letter) {
-        tile.state = letterStates[tile.letter] = LetterState.CORRECT;
+        tile.state = LetterState.CORRECT;
+        store.addLetterState(tile.letter, LetterState.CORRECT);
         answerLetters[i] = null;
       }
     });
@@ -108,8 +114,8 @@ function completeRow() {
       if (!tile.state && answerLetters.includes(tile.letter)) {
         tile.state = LetterState.PRESENT;
         answerLetters[answerLetters.indexOf(tile.letter)] = null;
-        if (!letterStates[tile.letter]) {
-          letterStates[tile.letter] = LetterState.PRESENT;
+        if (!(tile.letter in letterStates)) {
+          store.addLetterState(tile.letter, LetterState.PRESENT);
         }
       }
     });
@@ -117,30 +123,31 @@ function completeRow() {
     currentRow.forEach((tile) => {
       if (!tile.state) {
         tile.state = LetterState.ABSENT;
-        if (!letterStates[tile.letter]) {
-          letterStates[tile.letter] = LetterState.ABSENT;
+        if (!(tile.letter in letterStates)) {
+          store.addLetterState(tile.letter, LetterState.ABSENT);
         }
       }
     });
 
-    allowInput = false;
+    store.updateAllowInput(false);
     if (currentRow.every((tile) => tile.state === LetterState.CORRECT)) {
       // yay!
       setTimeout(() => {
-        grid = genResultGrid();
+        const gridString = genResultGrid();
+        store.updateGrid(gridString);
         showMessage(
           ["Genius", "Magnificent", "Impressive", "Splendid", "Great", "Phew"][
-            currentRowIndex
+            currentRowIndex.value
           ],
           -1
         );
-        success = true;
+        store.updateSuccess(true);
       }, 1600);
-    } else if (currentRowIndex < board.length - 1) {
+    } else if (currentRowIndex.value < board.value.length - 1) {
       // go the next row
-      currentRowIndex++;
+      store.incrementRowIndex();
       setTimeout(() => {
-        allowInput = true;
+        store.updateAllowInput(true);
       }, 1600);
     } else {
       // game over :(
@@ -155,16 +162,16 @@ function completeRow() {
 }
 
 function showMessage(msg: string, time = 1000) {
-  message.value = msg;
+  store.updateMessage(msg);
   if (time > 0) {
     setTimeout(() => {
-      message.value = "";
+      store.updateMessage("");
     }, time);
   }
 }
 
 function shake() {
-  shakeRowIndex = currentRowIndex;
+  shakeRowIndex = currentRowIndex.value;
   setTimeout(() => {
     shakeRowIndex = -1;
   }, 1000);
@@ -178,8 +185,8 @@ const icons = {
 };
 
 function genResultGrid() {
-  return board
-    .slice(0, currentRowIndex + 1)
+  return board.value
+    .slice(0, currentRowIndex.value + 1)
     .map((row) => {
       return row.map((tile) => icons[tile.state]).join("");
     })
