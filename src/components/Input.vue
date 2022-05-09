@@ -5,6 +5,7 @@ import { isValidWord, getRandomAnswer, allWords } from "../words";
 import { getRandomWord } from "../solver";
 import sample from "lodash.sample";
 import intersection from "lodash.intersection";
+import difference from "lodash.difference";
 
 const query = ref("");
 const store = useStore();
@@ -48,8 +49,11 @@ async function solverOne() {
   let wordBank = allWords;
   let correctLetters = [];
   let presentLetters = [];
+  let absentLetters = [];
   let correctWords = [];
   let presentWords = [];
+  let absentWords = [];
+  let guesses = [];
   for (let i = 0; i < 5; i++) {
     if (!store.success) {
       let letterStates = store.boardState[i];
@@ -59,6 +63,9 @@ async function solverOne() {
         }
         if (obj.state === "present") {
           presentLetters.push(obj.letter);
+        }
+        if (obj.state === "absent") {
+          absentLetters.push(obj.letter);
         }
       });
       wordBank.forEach((word) => {
@@ -74,14 +81,24 @@ async function solverOne() {
         if (presentLetters.every((letter) => word.includes(letter))) {
           presentWords.push(word);
         }
+        if (
+          difference(absentLetters, presentLetters).every(
+            (letter) => !word.includes(letter)
+          )
+        ) {
+          absentWords.push(word);
+        }
       });
-      let newBank = intersection(correctWords, presentWords);
+      let newBank = intersection(correctWords, presentWords, absentWords);
       correctWords = [];
       presentWords = [];
+      absentWords = [];
       if (newBank.length !== 0) {
         wordBank = newBank;
       }
-      store.updateCurrentRow(sample(wordBank));
+      let guess = sample(difference(wordBank, guesses));
+      guesses.push(guess);
+      store.updateCurrentRow(guess);
       store.completeRow();
       await timer(2000);
     } else {
