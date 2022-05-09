@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useStore } from "../store/store";
 import { isValidWord } from "../words";
 import { getRandomAnswer } from "../words";
@@ -7,6 +7,10 @@ import { getRandomAnswer } from "../words";
 const query = ref("");
 const store = useStore();
 let displayText = ref("");
+
+onMounted(() => {
+  useRandomAnswer();
+});
 
 function saveQuery(str) {
   if (isValidWord(str)) {

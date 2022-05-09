@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { computed, onUnmounted, watch } from "vue";
-import { isValidWord, getWordOfTheDay, allWords } from "../words";
 import Keyboard from "./Keyboard.vue";
 import Modal from "../components/Modal.vue";
-import { LetterState } from "../types";
 import { useStore } from "../store/store";
+
 const store = useStore();
 
 // Get word of the day
-const answer = computed(() => {
-  if (!store.inputWord || !isValidWord(store.inputWord)) {
-    return getWordOfTheDay();
-  }
-  return store.inputWord;
-});
 
 // Board state. Each tile is represented as { letter, state }
 const board = computed(() => {
@@ -24,7 +17,7 @@ const board = computed(() => {
 const currentRowIndex = computed(() => {
   return store.currentRowIndex;
 });
-const currentRow = $computed(() => board.value[currentRowIndex.value]);
+const currentRow = store.currentRowComputed;
 
 // Feedback state: message and shake
 const message = computed(() => {
@@ -36,10 +29,12 @@ const grid = computed(() => {
 const success = computed(() => {
   return store.success;
 });
-let shakeRowIndex = $ref(-1);
+const shakeRowIndex = computed(() => {
+  return store.shakeRowIndex;
+});
 
 watch(message, () => {
-  if (message) {
+  if (message.value) {
     setTimeout(() => {
       store.updateModal(true);
     }, 1500);
@@ -63,18 +58,18 @@ onUnmounted(() => {
 });
 
 function onKey(key: string) {
-  if (!allowInput || store.inputWordFocus) return;
+  if (!allowInput.value || store.inputWordFocus) return;
   if (/^[a-zA-Z]$/.test(key)) {
     fillTile(key.toLowerCase());
   } else if (key === "Backspace") {
     clearTile();
   } else if (key === "Enter") {
-    completeRow();
+    store.completeRow();
   }
 }
 
 function fillTile(letter: string) {
-  for (const tile of currentRow) {
+  for (const tile of currentRow.value) {
     if (!tile.letter) {
       tile.letter = letter;
       break;
@@ -83,114 +78,12 @@ function fillTile(letter: string) {
 }
 
 function clearTile() {
-  for (const tile of [...currentRow].reverse()) {
+  for (const tile of [...currentRow.value].reverse()) {
     if (tile.letter) {
       tile.letter = "";
       break;
     }
   }
-}
-
-function completeRow() {
-  if (currentRow.every((tile) => tile.letter)) {
-    const guess = currentRow.map((tile) => tile.letter).join("");
-    if (!allWords.includes(guess) && guess !== answer.value) {
-      shake();
-      showMessage(`Not in word list`);
-      return;
-    }
-
-    const answerLetters: (string | null)[] = answer.value.split("");
-    // first pass: mark correct ones
-    currentRow.forEach((tile, i) => {
-      if (answerLetters[i] === tile.letter) {
-        tile.state = LetterState.CORRECT;
-        store.addLetterState(tile.letter, LetterState.CORRECT);
-        answerLetters[i] = null;
-      }
-    });
-    // second pass: mark the present
-    currentRow.forEach((tile) => {
-      if (!tile.state && answerLetters.includes(tile.letter)) {
-        tile.state = LetterState.PRESENT;
-        answerLetters[answerLetters.indexOf(tile.letter)] = null;
-        if (!(tile.letter in letterStates)) {
-          store.addLetterState(tile.letter, LetterState.PRESENT);
-        }
-      }
-    });
-    // 3rd pass: mark absent
-    currentRow.forEach((tile) => {
-      if (!tile.state) {
-        tile.state = LetterState.ABSENT;
-        if (!(tile.letter in letterStates)) {
-          store.addLetterState(tile.letter, LetterState.ABSENT);
-        }
-      }
-    });
-
-    store.updateAllowInput(false);
-    if (currentRow.every((tile) => tile.state === LetterState.CORRECT)) {
-      // yay!
-      setTimeout(() => {
-        const gridString = genResultGrid();
-        store.updateGrid(gridString);
-        showMessage(
-          ["Genius", "Magnificent", "Impressive", "Splendid", "Great", "Phew"][
-            currentRowIndex.value
-          ],
-          -1
-        );
-        store.updateSuccess(true);
-      }, 1600);
-    } else if (currentRowIndex.value < board.value.length - 1) {
-      // go the next row
-      store.incrementRowIndex();
-      setTimeout(() => {
-        store.updateAllowInput(true);
-      }, 1600);
-    } else {
-      // game over :(
-      setTimeout(() => {
-        showMessage(answer.value.toUpperCase(), -1);
-      }, 1600);
-    }
-  } else {
-    shake();
-    showMessage("Not enough letters");
-  }
-}
-
-function showMessage(msg: string, time = 1000) {
-  store.updateMessage(msg);
-  if (time > 0) {
-    setTimeout(() => {
-      store.updateMessage("");
-    }, time);
-  }
-}
-
-function shake() {
-  shakeRowIndex = currentRowIndex.value;
-  setTimeout(() => {
-    shakeRowIndex = -1;
-  }, 1000);
-}
-
-const icons = {
-  [LetterState.CORRECT]: "🟩",
-  [LetterState.PRESENT]: "🟨",
-  [LetterState.ABSENT]: "⬜",
-  [LetterState.INITIAL]: null,
-};
-
-function genResultGrid() {
-  return board.value
-    .slice(0, currentRowIndex.value + 1)
-    .map((row) => {
-      return row.map((tile) => icons[tile.state]).join("");
-    })
-    .join("\n");
 }
 </script>
 
