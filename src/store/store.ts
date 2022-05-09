@@ -54,6 +54,13 @@ export const useStore = defineStore("main", {
       }),
   },
   actions: {
+    updateCurrentRow(guess: string) {
+      for (const [index, tile] of this.boardState[
+        this.currentRowIndex
+      ].entries()) {
+        tile.letter = guess[index];
+      }
+    },
     showMessage(msg: string, time = 1000) {
       this.message = msg;
       if (time > 0) {
