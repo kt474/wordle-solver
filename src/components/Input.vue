@@ -81,8 +81,9 @@ async function solverOne() {
         if (presentLetters.every((letter) => word.includes(letter))) {
           presentWords.push(word);
         }
+        let correctLettersArray = correctLetters.map((obj) => obj.letter);
         if (
-          difference(absentLetters, presentLetters).every(
+          difference(absentLetters, presentLetters, correctLettersArray).every(
             (letter) => !word.includes(letter)
           )
         ) {
