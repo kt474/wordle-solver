@@ -43,7 +43,7 @@ async function guessRandomWord() {
 }
 
 async function solverOne() {
-  store.updateCurrentRow("salet");
+  store.updateCurrentRow("crane");
   store.completeRow();
   await timer(2000);
   let wordBank = allWords;
@@ -62,7 +62,7 @@ async function solverOne() {
           correctLetters.push({ index: index, letter: obj.letter });
         }
         if (obj.state === "present") {
-          presentLetters.push(obj.letter);
+          presentLetters.push({ index: index, letter: obj.letter });
         }
         if (obj.state === "absent") {
           absentLetters.push(obj.letter);
@@ -78,14 +78,21 @@ async function solverOne() {
         if (count === correctLetters.length) {
           correctWords.push(word);
         }
-        if (presentLetters.every((letter) => word.includes(letter))) {
+        if (
+          presentLetters.every(
+            (obj) => word.includes(obj.letter) && word[obj.index] !== obj.letter
+          )
+        ) {
           presentWords.push(word);
         }
         let correctLettersArray = correctLetters.map((obj) => obj.letter);
+        let presentLettersArray = presentLetters.map((obj) => obj.letter);
         if (
-          difference(absentLetters, presentLetters, correctLettersArray).every(
-            (letter) => !word.includes(letter)
-          )
+          difference(
+            absentLetters,
+            presentLettersArray,
+            correctLettersArray
+          ).every((letter) => !word.includes(letter))
         ) {
           absentWords.push(word);
         }
