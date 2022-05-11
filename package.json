@@ -1,5 +1,5 @@
 {
-  "name": "vue-wordle",
+  "name": "wordle-solver",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",

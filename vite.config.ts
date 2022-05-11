@@ -1,4 +1,4 @@
-import { defineConfig } from "Vite";
+import { defineConfig } from "vite";
 //@ts-ignore
 import vue from "@vitejs/plugin-vue";
 
