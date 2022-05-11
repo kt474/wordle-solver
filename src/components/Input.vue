@@ -2,7 +2,6 @@
 import { ref, onMounted } from "vue";
 import { useStore } from "../store/store";
 import { isValidWord, getRandomAnswer, allWords } from "../words";
-import { getRandomWord } from "../solver";
 import sample from "lodash.sample";
 import intersection from "lodash.intersection";
 import difference from "lodash.difference";
@@ -26,20 +25,10 @@ function saveQuery(str) {
   }
 }
 function useRandomAnswer() {
+  query.value = "";
   const answer = getRandomAnswer();
   store.updateQuery(answer);
   displayText.value = answer;
-}
-
-async function guessRandomWord() {
-  for (let i = 0; i < 2; i++) {
-    if (!store.success) {
-      const guess = getRandomWord();
-      store.updateCurrentRow(guess);
-      store.completeRow();
-      await timer(2000);
-    }
-  }
 }
 
 async function solverOne() {
@@ -124,14 +113,14 @@ async function solverOne() {
       @focusin="store.updateFocusState(true)"
       @focusout="store.updateFocusState(false)"
       type="text"
-      placeholder="Wordle Answer"
+      placeholder="Custom Answer"
       @keyup.enter="saveQuery(query)"
     />
     <div class="m-1">
       <button
         @click="saveQuery(query)"
         type="button"
-        class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+        class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       >
         Enter
       </button>
@@ -141,41 +130,34 @@ async function solverOne() {
     <button
       @click="useRandomAnswer"
       type="button"
-      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
     >
-      Generate Random Answer
+      Random Answer
     </button>
+  </div>
+  <div class="flex">
+    <div class="mt-2">
+      <button
+        @click="solverOne"
+        type="button"
+        class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Solve
+      </button>
+    </div>
+    <div class="mt-2">
+      <button
+        @click="store.resetBoardState()"
+        type="button"
+        class="text-white bg-rose-700 hover:bg-rose-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-rose-800"
+      >
+        Clear Board
+      </button>
+    </div>
   </div>
   <div>
-    <p class="align text-black dark:text-white">
+    <p class="text-lg align text-black dark:text-white">
       Current Answer: {{ displayText }}
     </p>
-  </div>
-  <div class="mt-2">
-    <button
-      @click="store.resetBoardState()"
-      type="button"
-      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    >
-      Clear Board
-    </button>
-  </div>
-  <div class="mt-2">
-    <button
-      @click="guessRandomWord"
-      type="button"
-      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    >
-      Random Solver
-    </button>
-  </div>
-  <div class="mt-2">
-    <button
-      @click="solverOne"
-      type="button"
-      class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-    >
-      Test
-    </button>
   </div>
 </template>

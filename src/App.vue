@@ -18,7 +18,7 @@ const store = useStore();
         <div class="">
           <Game />
         </div>
-        <div class="ml-16 mt-8">
+        <div class="ml-16 mt-12">
           <Input />
         </div>
       </div>
