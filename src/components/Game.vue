@@ -37,7 +37,7 @@ watch(message, () => {
   if (message.value) {
     setTimeout(() => {
       store.updateModal(true);
-    }, 1500);
+    }, 1000);
   }
 });
 

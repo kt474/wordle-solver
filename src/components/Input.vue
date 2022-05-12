@@ -10,6 +10,7 @@ const defaultStartingWord = "salet";
 const query = ref("");
 const startingWord = ref("");
 const store = useStore();
+const possibleGuesses = ref(allWords);
 let displayText = ref("");
 let displayStartingWord = ref(defaultStartingWord);
 
@@ -26,6 +27,11 @@ function saveQuery(str) {
   } else {
     displayText.value = "Not a valid word";
   }
+}
+
+function clearBoard() {
+  store.resetBoardState();
+  possibleGuesses.value = allWords;
 }
 
 function saveStartingWord(str) {
@@ -110,6 +116,7 @@ async function solverOne() {
         absentWords = [];
         if (newBank.length !== 0) {
           wordBank = newBank;
+          possibleGuesses.value = newBank;
         }
         let guess = sample(difference(wordBank, guesses));
         guesses.push(guess);
@@ -187,7 +194,7 @@ async function solverOne() {
     </div>
     <div class="mt-2">
       <button
-        @click="store.resetBoardState()"
+        @click="clearBoard"
         type="button"
         class="text-white bg-rose-700 hover:bg-rose-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-rose-600 dark:hover:bg-rose-700 focus:outline-none dark:focus:ring-rose-800"
       >
@@ -202,5 +209,12 @@ async function solverOne() {
     <p class="text-lg align text-black dark:text-white">
       Current Answer: {{ displayText }}
     </p>
+  </div>
+  <div class="w-72 h-0.5 bg-neutral-400 mt-4"></div>
+  <div class="text-black dark:text-white mt-3">
+    <p class="text-lg align">Possible Guesses: {{ possibleGuesses.length }}</p>
+    <div class="w-72 h-72 break-normal overflow-auto">
+      {{ possibleGuesses.join(", ") }}
+    </div>
   </div>
 </template>
