@@ -41,6 +41,7 @@ export const useStore = defineStore("main", {
       success: false,
       allowInput: true,
       shakeRowIndex: -1,
+      startingWord: "",
     };
   },
   getters: {
@@ -54,6 +55,9 @@ export const useStore = defineStore("main", {
       }),
   },
   actions: {
+    updateStartingWord(word: string) {
+      this.startingWord = word;
+    },
     updateCurrentRow(guess: string) {
       for (const [index, tile] of this.boardState[
         this.currentRowIndex

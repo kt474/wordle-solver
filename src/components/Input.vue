@@ -6,9 +6,12 @@ import sample from "lodash.sample";
 import intersection from "lodash.intersection";
 import difference from "lodash.difference";
 
+const defaultStartingWord = "salet";
 const query = ref("");
+const startingWord = ref("");
 const store = useStore();
 let displayText = ref("");
+let displayStartingWord = ref(defaultStartingWord);
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -21,7 +24,16 @@ function saveQuery(str) {
     store.updateQuery(str);
     displayText.value = str;
   } else {
-    displayText.value = "Not a valid word ";
+    displayText.value = "Not a valid word";
+  }
+}
+
+function saveStartingWord(str) {
+  if (isValidWord(str)) {
+    store.updateStartingWord(str);
+    displayStartingWord.value = str;
+  } else {
+    displayStartingWord.value = "Not a valid word";
   }
 }
 function useRandomAnswer() {
@@ -33,7 +45,11 @@ function useRandomAnswer() {
 
 async function solverOne() {
   if (store.allowInput) {
-    store.updateCurrentRow("crane");
+    store.updateCurrentRow(
+      displayStartingWord.value.length === 5
+        ? displayStartingWord.value
+        : defaultStartingWord
+    );
     store.completeRow();
     await timer(2000);
     let wordBank = allWords;
@@ -110,6 +126,27 @@ async function solverOne() {
 <template>
   <div class="w-72 mt-8 flex justify-between">
     <input
+      v-model.trim="startingWord"
+      class="appearance-none block w-full bg-gray-200 text-gray-700 border border-blue-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+      id="grid-first-name"
+      @focusin="store.updateFocusState(true)"
+      @focusout="store.updateFocusState(false)"
+      type="text"
+      placeholder="Starting Word"
+      @keyup.enter="saveStartingWord(startingWord)"
+    />
+    <div class="m-1 ml-2">
+      <button
+        @click="saveStartingWord(startingWord)"
+        type="button"
+        class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Enter
+      </button>
+    </div>
+  </div>
+  <div class="w-72 mt-2 flex justify-between">
+    <input
       v-model.trim="query"
       class="appearance-none block w-full bg-gray-200 text-gray-700 border border-blue-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
       id="grid-first-name"
@@ -119,7 +156,7 @@ async function solverOne() {
       placeholder="Custom Answer"
       @keyup.enter="saveQuery(query)"
     />
-    <div class="m-1">
+    <div class="m-1 ml-2">
       <button
         @click="saveQuery(query)"
         type="button"
@@ -159,6 +196,9 @@ async function solverOne() {
     </div>
   </div>
   <div>
+    <p class="text-lg align text-black dark:text-white">
+      Starting Word: {{ displayStartingWord }}
+    </p>
     <p class="text-lg align text-black dark:text-white">
       Current Answer: {{ displayText }}
     </p>
