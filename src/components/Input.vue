@@ -32,74 +32,77 @@ function useRandomAnswer() {
 }
 
 async function solverOne() {
-  store.updateCurrentRow("crane");
-  store.completeRow();
-  await timer(2000);
-  let wordBank = allWords;
-  let correctLetters = [];
-  let presentLetters = [];
-  let absentLetters = [];
-  let correctWords = [];
-  let presentWords = [];
-  let absentWords = [];
-  let guesses = [];
-  for (let i = 0; i < 5; i++) {
-    if (!store.success) {
-      let letterStates = store.boardState[i];
-      letterStates.forEach((obj, index) => {
-        if (obj.state === "correct") {
-          correctLetters.push({ index: index, letter: obj.letter });
-        }
-        if (obj.state === "present") {
-          presentLetters.push({ index: index, letter: obj.letter });
-        }
-        if (obj.state === "absent") {
-          absentLetters.push(obj.letter);
-        }
-      });
-      wordBank.forEach((word) => {
-        let count = 0;
-        for (let i = 0; i < correctLetters.length; i++) {
-          if (word[correctLetters[i].index] === correctLetters[i].letter) {
-            count += 1;
+  if (store.allowInput) {
+    store.updateCurrentRow("crane");
+    store.completeRow();
+    await timer(2000);
+    let wordBank = allWords;
+    let correctLetters = [];
+    let presentLetters = [];
+    let absentLetters = [];
+    let correctWords = [];
+    let presentWords = [];
+    let absentWords = [];
+    let guesses = [];
+    for (let i = 0; i < 5; i++) {
+      if (!store.success) {
+        let letterStates = store.boardState[i];
+        letterStates.forEach((obj, index) => {
+          if (obj.state === "correct") {
+            correctLetters.push({ index: index, letter: obj.letter });
           }
+          if (obj.state === "present") {
+            presentLetters.push({ index: index, letter: obj.letter });
+          }
+          if (obj.state === "absent") {
+            absentLetters.push(obj.letter);
+          }
+        });
+        wordBank.forEach((word) => {
+          let count = 0;
+          for (let i = 0; i < correctLetters.length; i++) {
+            if (word[correctLetters[i].index] === correctLetters[i].letter) {
+              count += 1;
+            }
+          }
+          if (count === correctLetters.length) {
+            correctWords.push(word);
+          }
+          if (
+            presentLetters.every(
+              (obj) =>
+                word.includes(obj.letter) && word[obj.index] !== obj.letter
+            )
+          ) {
+            presentWords.push(word);
+          }
+          let correctLettersArray = correctLetters.map((obj) => obj.letter);
+          let presentLettersArray = presentLetters.map((obj) => obj.letter);
+          if (
+            difference(
+              absentLetters,
+              presentLettersArray,
+              correctLettersArray
+            ).every((letter) => !word.includes(letter))
+          ) {
+            absentWords.push(word);
+          }
+        });
+        let newBank = intersection(correctWords, presentWords, absentWords);
+        correctWords = [];
+        presentWords = [];
+        absentWords = [];
+        if (newBank.length !== 0) {
+          wordBank = newBank;
         }
-        if (count === correctLetters.length) {
-          correctWords.push(word);
-        }
-        if (
-          presentLetters.every(
-            (obj) => word.includes(obj.letter) && word[obj.index] !== obj.letter
-          )
-        ) {
-          presentWords.push(word);
-        }
-        let correctLettersArray = correctLetters.map((obj) => obj.letter);
-        let presentLettersArray = presentLetters.map((obj) => obj.letter);
-        if (
-          difference(
-            absentLetters,
-            presentLettersArray,
-            correctLettersArray
-          ).every((letter) => !word.includes(letter))
-        ) {
-          absentWords.push(word);
-        }
-      });
-      let newBank = intersection(correctWords, presentWords, absentWords);
-      correctWords = [];
-      presentWords = [];
-      absentWords = [];
-      if (newBank.length !== 0) {
-        wordBank = newBank;
+        let guess = sample(difference(wordBank, guesses));
+        guesses.push(guess);
+        store.updateCurrentRow(guess);
+        store.completeRow();
+        await timer(2000);
+      } else {
+        break;
       }
-      let guess = sample(difference(wordBank, guesses));
-      guesses.push(guess);
-      store.updateCurrentRow(guess);
-      store.completeRow();
-      await timer(2000);
-    } else {
-      break;
     }
   }
 }
