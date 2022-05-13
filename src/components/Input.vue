@@ -11,6 +11,7 @@ const query = ref("");
 const startingWord = ref("");
 const store = useStore();
 const possibleGuesses = ref(allWords);
+const summary = ref([]);
 let displayText = ref("");
 let displayStartingWord = ref(defaultStartingWord);
 
@@ -32,6 +33,7 @@ function saveQuery(str) {
 function clearBoard() {
   store.resetBoardState();
   possibleGuesses.value = allWords;
+  summary.value = [];
 }
 
 function saveStartingWord(str) {
@@ -51,11 +53,12 @@ function useRandomAnswer() {
 
 async function solverOne() {
   if (store.allowInput) {
-    store.updateCurrentRow(
+    const firstGuess =
       displayStartingWord.value.length === 5
         ? displayStartingWord.value
-        : defaultStartingWord
-    );
+        : defaultStartingWord;
+    store.updateCurrentRow(firstGuess);
+    summary.value.push({ guess: firstGuess });
     store.completeRow();
     await timer(2000);
     let wordBank = allWords;
@@ -111,6 +114,7 @@ async function solverOne() {
           }
         });
         let newBank = intersection(correctWords, presentWords, absentWords);
+        summary.value[i]["answers"] = newBank.length;
         correctWords = [];
         presentWords = [];
         absentWords = [];
@@ -119,6 +123,7 @@ async function solverOne() {
           possibleGuesses.value = newBank;
         }
         let guess = sample(difference(wordBank, guesses));
+        summary.value.push({ guess: guess });
         guesses.push(guess);
         store.updateCurrentRow(guess);
         store.completeRow();
@@ -213,8 +218,41 @@ async function solverOne() {
   <div class="w-72 h-0.5 bg-neutral-400 mt-4"></div>
   <div class="text-black dark:text-white mt-3">
     <p class="text-lg align">Possible Guesses: {{ possibleGuesses.length }}</p>
-    <div class="w-72 h-72 break-normal overflow-auto">
+    <div
+      class="w-72 break-normal overflow-auto"
+      :class="store.grid ? 'h-18' : 'h-72'"
+    >
       {{ possibleGuesses.join(", ") }}
     </div>
+  </div>
+
+  <div
+    v-if="store.grid"
+    class="relative overflow-x-auto shadow-sm sm:rounded-md mt-3"
+  >
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead
+        class="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400"
+      >
+        <tr>
+          <th scope="col" class="px-6 py-3">Guess</th>
+          <th scope="col" class="px-6 py-3">Answers Left</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="guess in summary"
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+        >
+          <th
+            scope="row"
+            class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
+          >
+            {{ guess.guess }}
+          </th>
+          <td class="px-6 py-4">{{ guess.answers }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
