@@ -119,10 +119,10 @@ async function solverOne() {
         presentWords = [];
         absentWords = [];
         if (newBank.length !== 0) {
-          wordBank = newBank;
+          wordBank = difference(newBank, guesses);
           possibleGuesses.value = newBank;
         }
-        let guess = sample(difference(wordBank, guesses));
+        let guess = sample(wordBank);
         summary.value.push({ guess: guess });
         guesses.push(guess);
         store.updateCurrentRow(guess);

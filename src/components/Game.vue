@@ -94,7 +94,9 @@ function clearTile() {
     </div>
   </Transition>
   <header>
-    <h1 class="text-3xl text-center text-black dark:text-white">Wordle</h1>
+    <h1 class="text-3xl text-center text-black dark:text-white">
+      Wordle Solver
+    </h1>
   </header>
   <div id="board">
     <div
