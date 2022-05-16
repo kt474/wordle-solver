@@ -1,6 +1,6 @@
 # Wordle Solver 
 
-A UI made with Vue to use different algorithms to solve any wordle game. 
+A simple wordle solver built with Vue. 
 
 
 
